@@ -1,0 +1,24 @@
+{
+  "name": "package-vue-i18n",
+  "version": "1.0.0",
+  "description": "Easy translate solution.",
+  "author": {
+    "email": "wanghao29@lenovo.com",
+    "name": "wanghao"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@g.lenovo.com.cn:CUBE/package-vue-i18n.git"
+  },
+  "bin": {
+    "trans": "./bin/trans"
+  },
+  "main": "./index.js",
+  "homepage": "http://g.lenovo.com.cn/CUBE/package-vue-i18n",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "coa": "^2.0.2",
+    "axios": "^0.19.2",
+    "lodash.get": "^4.4.2"
+  }
+}
