@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@g.lenovo.com.cn:CUBE/package-vue-i18n.git"
+    "url": "git@g.lenovo.com.cn:CUBE/package/package-vue-i18n.git"
   },
   "bin": {
     "trans": "./bin/trans"
@@ -20,5 +20,9 @@
     "coa": "^2.0.2",
     "axios": "^0.19.2",
     "lodash.get": "^4.4.2"
+  },
+  "engines": {
+    "node": ">=10.12.0",
+    "npm": ">= 3.0.0"
   }
 }

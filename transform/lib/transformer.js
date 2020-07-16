@@ -1,4 +1,5 @@
 const path = require('path')
+const config = require('./util').getConfig()
 
 const regxAttr = /(\S+)="([\u4e00-\u9fa5\w，：；、“”"！《》【】（）…。？!?#%&+*,.:\[\]\(\)\/\- ]+)"/g
 const regxStatement = /'([\u4e00-\u9fa5\w，：；、“”"！《》【】（）…。？!?#%&+*,.\[\]\(\)\/\- ]+)'(?!:)/g
@@ -14,7 +15,7 @@ const regxI18nTag = /@\w{5}:/
 const regxI18nTagAdnContent = /\$t\('(@\w{5}:)(.*?)'\)/g
 
 // 文件级别的禁用
-const translatorDisabled = 'vue-i18n-translator:disabled'
+const translatorDisabled = config.statement.disabled || 'vue-i18n-translator:disabled'
 
 /**
  * 进行字符串替换，并输出修改后的源码和i18n 映射关系
@@ -127,7 +128,8 @@ const pipeImporti18n = function(origin, pathHash, i18n, extname) {
   if (i18n.size === 0) {
     return origin
   }
-  const imp = `import { $t } from '@/lang/static'`
+  // `import { $t } from '@/lang/static'`
+  const imp = config.statement.imp
   if (origin.includes(imp)) {
     return origin
   }

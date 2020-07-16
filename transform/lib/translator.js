@@ -4,9 +4,9 @@ const fs = require('fs')
 const path = require('path')
 const readline = require('readline')
 const get = require('lodash.get')
+const util = require('./util')
 
-const appid = '20200205000380671'
-const key = 'bk_YljU2i6Q7V3nYkJFG'
+const config = util.getConfig()
 
 const service = axios.create({
   timeout: 10 * 1000,
@@ -30,11 +30,11 @@ const request = function(content, to) {
     method: 'get',
     params: {
       q: query,
-      appid: appid,
+      appid: config.baidu.appid,
       salt: salt,
       from: 'zh',
       to: to || 'en',
-      sign: md5(appid + query + salt + key)
+      sign: md5(config.baidu.appid + query + salt + config.baidu.key)
     }
   })
 }
@@ -44,32 +44,9 @@ const md5 = function(content) {
 }
 
 /**
- * 获取文件路径的hash
- * @param filePath
- * @return {string}
+ * 执行全量的翻译
+ * @param to
  */
-function hash(filePath) {
-  const crypto = require('crypto')
-
-  const secret = 'abcdefg'
-  const hash = crypto.createHmac('sha256', secret)
-    .update(filePath)
-    .digest('hex')
-  // 前缀格式 @XXXX:
-  return `@${hash.substr(0, 5).toUpperCase()}:`
-}
-
-class Package {
-  constructor(path) {
-    this.path = path
-    this.hash = hash(path)
-    this.list = []
-  }
-  push(item) {
-
-  }
-}
-
 const startTask = function(to) {
   if (!pool.length) {
     save(to)
@@ -109,12 +86,7 @@ const save = function(to) {
     threads--
     return
   }
-  saveFile(to, outputContent)
-}
-
-const saveFile = function(to, content) {
-  console.log(LOGNAME, '正在生成多语言入口文件', to)
-  fs.writeFileSync(path.resolve(`./src/lang/${to}/auto.js`), content.join('\r\n') + '\r\n')
+  util.saveFile(to, outputContent)
 }
 
 const LOGNAME = '[translator] '
@@ -126,34 +98,12 @@ const regxContent = /: '([\S ]+)',?/
 const regxChinese = /[\u4e00-\u9fa5]/
 
 /**
- * 读取文件
+ * 开始执行全量翻译
  * @param to
- * @param handleLine
- * @return {Promise<Array>}
  */
-const loadFile = function(to = 'en', handleLine) {
-  const lines = []
-  const rl = readline.createInterface({
-    input: fs.createReadStream(`./src/lang/${to}/auto.js`)
-  })
-  rl.on('line', (line) => {
-    if (handleLine) {
-      lines.push(handleLine(line))
-    } else {
-      lines.push(line)
-    }
-  })
-  return new Promise((resolve, reject) => {
-    rl.on('close', () => {
-      resolve(lines)
-    })
-  })
-}
-
-// 开始执行全量翻译
 const runTask = function(to = 'en') {
   const rl = readline.createInterface({
-    input: fs.createReadStream('./src/lang/zh/auto.js')
+    input: fs.createReadStream(path.resolve(config.i18n, 'zh', 'index.js'))
   })
   rl.on('line', (line) => {
     outputContent.push(line)
@@ -172,10 +122,13 @@ const runTask = function(to = 'en') {
   })
 }
 
-// 执行检查动作，非全量
+/**
+ * 执行英文包的追加部分翻译
+ * @param to
+ */
 const runCheckTask = function(to = 'en') {
   const rl = readline.createInterface({
-    input: fs.createReadStream('./src/lang/en/auto.js')
+    input: fs.createReadStream(path.resolve(config.i18n, to, 'index.js'))
   })
   rl.on('line', (line) => {
     outputContent.push(line)
@@ -196,11 +149,11 @@ const runCheckTask = function(to = 'en') {
   })
 }
 
-// 执行对比，增量
 const regxKeyAndContent = /'(@\w{5}:)(.+)':/
+// 执行对比中英文，对英文包进行增量追加
 const runAddonTask = async function(to = 'en') {
-  const zh = await loadFile('zh')
-  const en = await loadFile(to)
+  const zh = await util.loadFile('zh')
+  const en = await util.loadFile(to)
   for (const line of zh) {
     const match = regxKeyAndContent.exec(line)
     if (!match) {
@@ -220,7 +173,7 @@ const runAddonTask = async function(to = 'en') {
     console.log(LOGNAME, '追加', match[0])
   }
   // todo 保存并局部翻译
-  saveFile(to, en)
+  util.saveFile(to, en)
 }
 
 // 先执行，vue.template.test.js

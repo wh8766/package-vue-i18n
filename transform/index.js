@@ -2,37 +2,23 @@ const fs = require('fs')
 const path = require('path')
 const transform = require('./lib/transformer')
 const LOGNAME = '[i18n]'
+const util = require('./lib/util')
 
-const defaultConfig = {
-  root: path.resolve(process.cwd(), 'src'),
-  src: path.resolve(process.cwd(), 'src'),
-  output: path.resolve(process.cwd(), 'src/lang/zh/auto.js'),
-  i18n: '/src/lang/auto.js',
-  ext: ['.vue', '.js'],
-  exclude: [
-    '/src/lang',
-    '/src/assets',
-    '/src/icons',
-    '/src/mock',
-    '/src/styles',
-    '/src/filters',
-    '/src/utils',
-    'RegionPicker'
-  ]
-}
+const config = util.getConfig()
+
 const mapFileContent = []
 const filePaths = []
 
-module.exports = function(config) {
+module.exports = function() {
   mapFileContent.push(`// 这里是自动生成的内容 ${new Date()}`)
   mapFileContent.push('export default {')
-  findFile(config.src, Object.assign(defaultConfig, config))
+  findFile(config.src)
   mapFileContent.push('}\r\n')
   console.log(LOGNAME, '正在生成多语言入口文件')
-  fs.writeFileSync(path.resolve(config.i18n), mapFileContent.join('\r\n'))
+  util.saveFile('zh', mapFileContent.join('\r\n'))
 }
 
-function findFile(dirPath, config) {
+function findFile(dirPath) {
   // 转换为绝对路径
   const param = path.resolve(dirPath)
   if (!fs.existsSync(param)) {
@@ -47,7 +33,7 @@ function findFile(dirPath, config) {
       // 遍历之后递归调用查看文件函数
       // 遍历目录得到的文件名称是不含路径的，需要将前面的绝对路径拼接
       const absolutePath = path.resolve(path.join(param, e))
-      findFile(absolutePath, config)
+      findFile(absolutePath)
     })
   } else {
     // 如果不是目录，打印文件信息
@@ -58,7 +44,7 @@ function findFile(dirPath, config) {
   }
 }
 
-function loadFile(filePath, config) {
+function loadFile(filePath) {
   console.log(LOGNAME, filePath, '正在处理')
   const content = fs.readFileSync(path.resolve(filePath), 'utf-8')
   const relativePath = path.relative(config.root, filePath)
@@ -80,7 +66,7 @@ function loadFile(filePath, config) {
   console.log(LOGNAME, relativePath, '完成处理, size = ', re.i18n.size)
 }
 
-function isInclude(filePath, config) {
+function isInclude(filePath) {
   const paths = config.exclude.map(p => p.replace(/\//g, '\\'))
   const re = paths.some(p => {
     return filePath.includes(p)

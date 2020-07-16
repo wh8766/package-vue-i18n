@@ -5,14 +5,14 @@ const PKG = require('./package.json')
 
 const trans = require('./transform')
 const translator = require('./transform/lib/translator')
-const path = require('path')
 
 /**
  * Command-Option-Argument.
  *
  * @see https://github.com/veged/coa
  */
-module.exports = require('coa').Cmd()
+module.exports = require('coa')
+  .Cmd().title('执行源码国际化替换')
   .helpful()
   .name('trans')
   .title(PKG.description)
@@ -28,60 +28,46 @@ module.exports = require('coa').Cmd()
       return ''
     })
     .end()
-  .opt()
-    .name('root').title('Root directory, "-" for STDIN')
-    .short('r').long('root')
-    .val(function(val) {
-      return val || this.reject('Option \'--root\' must have a value.')
-    })
-    .end()
-  .opt()
-    .name('src').title('Root directory, "-" for STDIN')
-    .short('s').long('src')
-    .val(function(val) {
-      return val || this.reject('Option \'--src\' must have a value.')
-    })
-    .end()
-  .opt()
-    .name('output').title('Root directory, "-" for STDIN')
-    .short('o').long('output')
-    .val(function(val) {
-      return val || this.reject("Option '--output' must have a value.");
-    })
-    .end()
   .cmd()
-    .name('example').title('Root directory, "-" for STDIN')
-    .act(function(opts, args, res) {
-      trans({
-        root: path.resolve(process.cwd(), ''),
-        src: path.resolve(process.cwd(), 'transform/example'),
-        output: path.resolve(process.cwd(), 'transform/output'),
-        exclude: [],
-        i18n: path.resolve(process.cwd(), 'transform/output/auto.js')
-      })
-    })
-    .end()
-  .cmd()
-    .name('add')
+    .name('translate').title('开始执行全量翻译')
     .opt()
-      .name('to').title('Translate to target language')
-      .long('to')
+      .name('to').title('目标语言，默认是en')
+      .long('to').short('t')
+      .val(function(val) {
+        return val || this.reject('Option \'--to\' must have a value.')
+      })
+      .end()
+    .act(function(opts) {
+      translator.runTask(opts.to)
+    })
+    .end()
+  .cmd()
+    .name('add').title('执行对比中英文，对英文包进行增量追加')
+    .opt()
+      .name('to').title('目标语言，默认是en')
+      .long('to').short('t')
+      .val(function(val) {
+        return val || this.reject('Option \'--to\' must have a value.')
+      })
       .end()
     .act(function(opts) {
       translator.runAddonTask(opts.to)
     })
     .end()
   .cmd()
-    .name('check')
+    .name('check').title('执行英文包的追加部分翻译')
     .opt()
-      .name('check').title('Check and translate to target language')
-      .long('check')
+      .name('to').title('目标语言，默认是en')
+      .long('to').short('t')
+      .val(function(val) {
+        return val || this.reject('Option \'--to\' must have a value.')
+      })
       .end()
     .act(function(opts) {
-      translator.runAddonTask(opts.check)
+      translator.runCheckTask(opts.to)
     })
     .end()
   .act(function(opts, args) {
-    console.log(opts, args)
+    trans()
   })
 
