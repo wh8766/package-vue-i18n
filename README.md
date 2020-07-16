@@ -13,9 +13,10 @@
 ```json
 {
   "scripts": {
-    "i18n:start": "trans start",
+    "i18n:start": "trans",
+    "i18n:translate": "trans translate",
     "i18n:add": "trans add",
-    "i18n:translate": "trans translate"
+    "i18n:check": "trans check"
   },
   "dependencies": {
     "package-vue-i18n": "git+ssh://git@g.lenovo.com.cn:CUBE/package/package-vue-i18n.git"
