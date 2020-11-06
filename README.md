@@ -9,7 +9,7 @@
 
 ## 快速开始
 
-在`package.json` 里添加私有仓库
+在`package.json` 里添加私有仓库（内网环境）
 ```json
 {
   "scripts": {
@@ -28,6 +28,8 @@
 
 请在项目根目录下创建 `i18n.config.js`，进行目录和排除项配置
 ```js
+const path = require('path')
+
 module.exports = {
   root: path.resolve(process.cwd(), 'src'),
   src: path.resolve(process.cwd(), 'src'),
@@ -170,4 +172,4 @@ A 迭代或者修改bug，都可以正常进行，只需要在版本发布前按
 
 Q 是否可以串行执行命令？
 
-A 目前还不可以，百度做了最大并发数限制，目前用异步请求池完成的
+A 目前还不可以，百度翻译API 做了最大并发数限制，目前用异步请求池完成的
