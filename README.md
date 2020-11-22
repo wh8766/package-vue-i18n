@@ -9,7 +9,9 @@
 
 ## 快速开始
 
-在`package.json` 里添加私有仓库（内网环境）
+> npm i package-vue-i18n
+
+在`package.json` 里添加执行脚本
 ```json
 {
   "scripts": {
@@ -17,9 +19,6 @@
     "i18n:translate": "trans translate",
     "i18n:add": "trans add",
     "i18n:check": "trans check"
-  },
-  "dependencies": {
-    "package-vue-i18n": "git+ssh://git@g.lenovo.com.cn:CUBE/package/package-vue-i18n.git"
   }
 }
 ```
